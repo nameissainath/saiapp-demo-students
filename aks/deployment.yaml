@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cricket-api
+  labels:
+    app: cricket-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cricket-api
+  template:
+    metadata:
+      labels:
+        app: cricket-api
+    spec:
+      containers:
+        - name: cricket-api
+          image: sainathreddycontainer.azurecr.io/cricket-api:latest
+          ports:
+            - containerPort: 8000

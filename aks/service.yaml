@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cricket-api
+  labels:
+    app: cricket-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: cricket-api
+  ports:
+    - port: 80
+      targetPort: 8000
