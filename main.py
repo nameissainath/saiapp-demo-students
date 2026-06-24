@@ -75,6 +75,13 @@ NEWS = [
         "published_at": "2026-06-21T09:45:00Z",
         "category": "Match Report",
     },
+     {
+        "id": 5,
+        "title": "South Africa pace attack dominates day one",
+        "summary": "Visitors reduced the hosts to 180/7 on a lively pitch in Cape Town.",
+        "published_at": "2026-06-21T09:45:00Z",
+        "category": "Match Report",
+    },
 ]
 
 
