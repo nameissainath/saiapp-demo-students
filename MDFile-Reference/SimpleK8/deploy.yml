@@ -1,0 +1,49 @@
+# BACKUP — old :latest-only workflow (Step 9 style)
+# Push trigger is DISABLED so this file does NOT run on every git push.
+# Active workflow: deploy.yml
+# To use this again, rename/replace deploy.yml — do NOT enable push on both files.
+
+name: Build and Deploy to AKS (backup)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to ACR
+        run: az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/saiapp-demo:latest .
+
+      - name: Push image to ACR
+        run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/saiapp-demo:latest
+
+      - name: Connect kubectl to AKS
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} \
+            --name ${{ secrets.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Deploy to AKS
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+
+      - name: Restart deployment
+        run: kubectl rollout restart deployment/saiapp
+
+      - name: Verify rollout
+        run: kubectl rollout status deployment/saiapp --timeout=180s
