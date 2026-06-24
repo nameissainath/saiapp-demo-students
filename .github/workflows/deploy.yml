@@ -1,4 +1,4 @@
-name: Build and Deploy to AKS
+name: Build and Deploy to ACR, AKS and Web App
 
 on:
   push:
@@ -52,3 +52,20 @@ jobs:
 
       - name: Verify rollout
         run: kubectl rollout status deployment/cricket-api --timeout=180s
+
+      - name: Deploy to Azure Web App
+        run: |
+          az webapp config container set \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} \
+            --docker-custom-image-name ${{ secrets.ACR_LOGIN_SERVER }}/cricket-api:${{ env.IMAGE_TAG }}
+
+          az webapp restart \
+            --name ${{ secrets.AZURE_WEBAPP_NAME }} \
+            --resource-group ${{ secrets.AKS_RESOURCE_GROUP }}
+
+      - name: Verify Web App
+        run: |
+          echo "Web App URL: https://${{ secrets.AZURE_WEBAPP_HOSTNAME }}"
+          curl --fail --retry 5 --retry-delay 10 \
+            "https://${{ secrets.AZURE_WEBAPP_HOSTNAME }}/"
